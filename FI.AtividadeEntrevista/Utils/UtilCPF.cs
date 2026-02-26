@@ -14,22 +14,17 @@ namespace FI.AtividadeEntrevista.Utils
             if (string.IsNullOrWhiteSpace(cpf))
                 return false;
 
-            // Remove formatação (pontos, hífens, espaços)
             cpf = RemoverFormatacao(cpf);
 
-            // CPF deve ter exatamente 11 dígitos
             if (cpf.Length != 11)
                 return false;
 
-            // Verifica se todos os caracteres são dígitos
             if (!cpf.All(char.IsDigit))
                 return false;
 
-            // Verifica se todos os dígitos são iguais (ex: 111.111.111-11)
             if (cpf.Distinct().Count() == 1)
                 return false;
 
-            // Calcula e valida o primeiro dígito verificador
             int soma = 0;
             for (int i = 0; i < 9; i++)
                 soma += int.Parse(cpf[i].ToString()) * (10 - i);
@@ -40,7 +35,6 @@ namespace FI.AtividadeEntrevista.Utils
             if (int.Parse(cpf[9].ToString()) != digitoVerificador1)
                 return false;
 
-            // Calcula e valida o segundo dígito verificador
             soma = 0;
             for (int i = 0; i < 10; i++)
                 soma += int.Parse(cpf[i].ToString()) * (11 - i);

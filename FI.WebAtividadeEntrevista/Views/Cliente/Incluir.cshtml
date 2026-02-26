@@ -3,10 +3,13 @@
     ViewBag.Title = "Cadastrar Cliente";
 }
 @section scripts{
-    <script>
-        var urlPost = '@Url.Action("Incluir", "Cliente", new { area = "" })';
-    </script>
-    @Scripts.Render("~/bundles/clientes")
+	<script>
+		var urlPost = '@Url.Action("Incluir", "Cliente", new { area = "" })';
+		var urlPostComBeneficiarios = '@Url.Action("IncluirComBeneficiarios", "Cliente", new { area = "" })';
+	</script>
+	@Scripts.Render("~/bundles/clientes")
+	@Scripts.Render("~/bundles/Beneficiarios")
 }
 <h2>@Html.Raw(ViewBag.Title)</h2>
 @Html.Partial("Forms")
+@Html.Partial("_ModalBeneficiarios")

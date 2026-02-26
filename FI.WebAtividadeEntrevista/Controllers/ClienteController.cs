@@ -6,11 +6,19 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using FI.AtividadeEntrevista.DML;
+using FI.AtividadeEntrevista.Utils;
+using FI.WebAtividadeEntrevista.Mappers;
 
 namespace WebAtividadeEntrevista.Controllers
 {
     public class ClienteController : Controller
     {
+        private readonly BoCliente _boCliente;
+
+        public ClienteController()
+        {
+            _boCliente = new BoCliente();
+        }
         public ActionResult Index()
         {
             return View();
@@ -25,98 +33,86 @@ namespace WebAtividadeEntrevista.Controllers
         [HttpPost]
         public JsonResult Incluir(ClienteModel model)
         {
-            BoCliente bo = new BoCliente();
-            
             if (!this.ModelState.IsValid)
             {
                 List<string> erros = (from item in ModelState.Values
                                       from error in item.Errors
                                       select error.ErrorMessage).ToList();
-
                 Response.StatusCode = 400;
                 return Json(string.Join(Environment.NewLine, erros));
             }
-            else
-            {
-                
-                model.Id = bo.Incluir(new Cliente()
-                {                    
-                    CEP = model.CEP,
-                    Cidade = model.Cidade,
-                    Email = model.Email,
-                    Estado = model.Estado,
-                    Logradouro = model.Logradouro,
-                    Nacionalidade = model.Nacionalidade,
-                    Nome = model.Nome,
-                    Sobrenome = model.Sobrenome,
-                    Telefone = model.Telefone
-                });
 
-           
+            if (!UtilCPF.ValidarCPF(model.CPF))
+            {
+                Response.StatusCode = 400;
+                return Json("CPF inválido. Verifique o número digitado.");
+            }
+
+            if (_boCliente.VerificarExistencia(model.CPF))
+            {
+                Response.StatusCode = 400;
+                return Json("CPF já cadastrado no sistema.");
+            }
+
+            try
+            {
+                model.Id = _boCliente.Incluir(ClienteMapper.ParaEntidade(model));
                 return Json("Cadastro efetuado com sucesso");
+            }
+            catch (Exception ex)
+            {
+                Response.StatusCode = 500;
+                return Json("Erro ao cadastrar cliente. Contate o suporte.");
             }
         }
 
         [HttpPost]
         public JsonResult Alterar(ClienteModel model)
         {
-            BoCliente bo = new BoCliente();
-       
             if (!this.ModelState.IsValid)
             {
                 List<string> erros = (from item in ModelState.Values
                                       from error in item.Errors
                                       select error.ErrorMessage).ToList();
-
                 Response.StatusCode = 400;
                 return Json(string.Join(Environment.NewLine, erros));
             }
-            else
+
+            if (!UtilCPF.ValidarCPF(model.CPF))
             {
-                bo.Alterar(new Cliente()
-                {
-                    Id = model.Id,
-                    CEP = model.CEP,
-                    Cidade = model.Cidade,
-                    Email = model.Email,
-                    Estado = model.Estado,
-                    Logradouro = model.Logradouro,
-                    Nacionalidade = model.Nacionalidade,
-                    Nome = model.Nome,
-                    Sobrenome = model.Sobrenome,
-                    Telefone = model.Telefone
-                });
-                               
+                Response.StatusCode = 400;
+                return Json("CPF inválido. Verifique o número digitado.");
+            }
+
+            Cliente clienteAtual = _boCliente.Consultar(model.Id);
+
+            string cpfAtualSemFormatacao = UtilCPF.RemoverFormatacao(clienteAtual.CPF);
+            string cpfNovoSemFormatacao = UtilCPF.RemoverFormatacao(model.CPF);
+
+            if (cpfAtualSemFormatacao != cpfNovoSemFormatacao && 
+                _boCliente.VerificarExistencia(cpfNovoSemFormatacao))
+            {
+                Response.StatusCode = 400;
+                return Json("CPF já cadastrado para outro cliente.");
+            }
+
+            try
+            {
+                _boCliente.Alterar(ClienteMapper.ParaEntidade(model));
                 return Json("Cadastro alterado com sucesso");
+            }
+            catch (Exception ex)
+            {
+                Response.StatusCode = 500;
+                return Json("Erro ao alterar cliente. Contate o suporte.");
             }
         }
 
         [HttpGet]
         public ActionResult Alterar(long id)
         {
-            BoCliente bo = new BoCliente();
-            Cliente cliente = bo.Consultar(id);
-            Models.ClienteModel model = null;
-
-            if (cliente != null)
-            {
-                model = new ClienteModel()
-                {
-                    Id = cliente.Id,
-                    CEP = cliente.CEP,
-                    Cidade = cliente.Cidade,
-                    Email = cliente.Email,
-                    Estado = cliente.Estado,
-                    Logradouro = cliente.Logradouro,
-                    Nacionalidade = cliente.Nacionalidade,
-                    Nome = cliente.Nome,
-                    Sobrenome = cliente.Sobrenome,
-                    Telefone = cliente.Telefone
-                };
-
-            
-            }
-
+            Cliente cliente = _boCliente.Consultar(id);
+            ClienteModel model = ClienteMapper.ParaModel(cliente);
             return View(model);
         }
 
@@ -136,7 +132,7 @@ namespace WebAtividadeEntrevista.Controllers
                 if (array.Length > 1)
                     crescente = array[1];
 
-                List<Cliente> clientes = new BoCliente().Pesquisa(jtStartIndex, jtPageSize, campo, crescente.Equals("ASC", StringComparison.InvariantCultureIgnoreCase), out qtd);
+                List<Cliente> clientes = _boCliente.Pesquisa(jtStartIndex, jtPageSize, campo, crescente.Equals("ASC", StringComparison.InvariantCultureIgnoreCase), out qtd);
 
                 //Return result to jTable
                 return Json(new { Result = "OK", Records = clientes, TotalRecordCount = qtd });

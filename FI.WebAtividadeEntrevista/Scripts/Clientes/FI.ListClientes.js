@@ -1,5 +1,4 @@
-﻿
-$(document).ready(function () {
+﻿$(document).ready(function () {
 
     if (document.getElementById("gridClientes"))
         $('#gridClientes').jtable({
@@ -20,12 +19,30 @@ $(document).ready(function () {
                     title: 'Email',
                     width: '35%'
                 },
+                CPF: {
+                    title: 'CPF',
+                    width: '15%',
+                    display: function (data) {
+                        var cpf = data.record.CPF || '';
+                        // Remove caracteres não numéricos
+                        cpf = cpf.replace(/\D/g, '');
+                        // Formata CPF: 000.000.000-00
+                        if (cpf.length === 11) {
+                            return cpf.substring(0, 3) + '.' + 
+                                   cpf.substring(3, 6) + '.' + 
+                                   cpf.substring(6, 9) + '-' + 
+                                   cpf.substring(9, 11);
+                        }
+                        return cpf;
+                    }
+                },
                 Alterar: {
                     title: '',
                     display: function (data) {
                         return '<button onclick="window.location.href=\'' + urlAlteracao + '/' + data.record.Id + '\'" class="btn btn-primary btn-sm">Alterar</button>';
                     }
-                }
+                },
+
             }
         });
 

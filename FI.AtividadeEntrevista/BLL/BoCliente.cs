@@ -1,21 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using FI.AtividadeEntrevista.Utils;
 
 namespace FI.AtividadeEntrevista.BLL
 {
     public class BoCliente
     {
+        private readonly DAL.DaoCliente _daoCliente;
+
+        public BoCliente()
+        {
+            _daoCliente = new DAL.DaoCliente();
+        }
+
         /// <summary>
         /// Inclui um novo cliente
         /// </summary>
         /// <param name="cliente">Objeto de cliente</param>
         public long Incluir(DML.Cliente cliente)
         {
-            DAL.DaoCliente cli = new DAL.DaoCliente();
-            return cli.Incluir(cliente);
+            cliente.CPF = UtilCPF.RemoverFormatacao(cliente.CPF);
+            cliente.CEP = UtilCPF.RemoverFormatacao(cliente.CEP);
+            return _daoCliente.Incluir(cliente);
         }
 
         /// <summary>
@@ -24,8 +29,9 @@ namespace FI.AtividadeEntrevista.BLL
         /// <param name="cliente">Objeto de cliente</param>
         public void Alterar(DML.Cliente cliente)
         {
-            DAL.DaoCliente cli = new DAL.DaoCliente();
-            cli.Alterar(cliente);
+            cliente.CPF = UtilCPF.RemoverFormatacao(cliente.CPF);
+            cliente.CEP = UtilCPF.RemoverFormatacao(cliente.CEP);
+            _daoCliente.Alterar(cliente);
         }
 
         /// <summary>
@@ -35,8 +41,7 @@ namespace FI.AtividadeEntrevista.BLL
         /// <returns></returns>
         public DML.Cliente Consultar(long id)
         {
-            DAL.DaoCliente cli = new DAL.DaoCliente();
-            return cli.Consultar(id);
+            return _daoCliente.Consultar(id);
         }
 
         /// <summary>
@@ -46,8 +51,7 @@ namespace FI.AtividadeEntrevista.BLL
         /// <returns></returns>
         public void Excluir(long id)
         {
-            DAL.DaoCliente cli = new DAL.DaoCliente();
-            cli.Excluir(id);
+            _daoCliente.Excluir(id);
         }
 
         /// <summary>
@@ -55,8 +59,7 @@ namespace FI.AtividadeEntrevista.BLL
         /// </summary>
         public List<DML.Cliente> Listar()
         {
-            DAL.DaoCliente cli = new DAL.DaoCliente();
-            return cli.Listar();
+            return _daoCliente.Listar();
         }
 
         /// <summary>
@@ -64,8 +67,7 @@ namespace FI.AtividadeEntrevista.BLL
         /// </summary>
         public List<DML.Cliente> Pesquisa(int iniciarEm, int quantidade, string campoOrdenacao, bool crescente, out int qtd)
         {
-            DAL.DaoCliente cli = new DAL.DaoCliente();
-            return cli.Pesquisa(iniciarEm,  quantidade, campoOrdenacao, crescente, out qtd);
+            return _daoCliente.Pesquisa(iniciarEm, quantidade, campoOrdenacao, crescente, out qtd);
         }
 
         /// <summary>
@@ -75,8 +77,7 @@ namespace FI.AtividadeEntrevista.BLL
         /// <returns></returns>
         public bool VerificarExistencia(string CPF)
         {
-            DAL.DaoCliente cli = new DAL.DaoCliente();
-            return cli.VerificarExistencia(CPF);
+            return _daoCliente.VerificarExistencia(CPF);
         }
     }
 }

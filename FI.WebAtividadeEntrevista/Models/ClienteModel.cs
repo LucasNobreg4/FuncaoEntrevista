@@ -23,6 +23,8 @@ namespace WebAtividadeEntrevista.Models
         /// CPF
         /// </summary>
         [Required]
+        [RegularExpression(@"^\d{3}\.\d{3}\.\d{3}-\d{2}$|^\d{11}$",
+        ErrorMessage = "CPF inválido")]
         public string CPF { get; set; }
 
         /// <summary>
@@ -34,7 +36,8 @@ namespace WebAtividadeEntrevista.Models
         /// <summary>
         /// E-mail
         /// </summary>
-        [RegularExpression(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$", ErrorMessage = "Digite um e-mail válido")]
+        [Required]
+        [RegularExpression(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", ErrorMessage ="Email invalido")]
         public string Email { get; set; }
 
         /// <summary>
